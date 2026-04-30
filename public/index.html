@@ -1,36 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chat</title>
+    <title>Chat App</title>
 </head>
 <body>
-    <ul id="messages"></ul>
-    <form id="form">
-        <input id="input" autocomplete="off" />
-        <button>Küldés</button>
-    </form>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
+<h2>Chat</h2>
 
-        const form = document.getElementById("form");
-        const input = document.getElementById("input");
-        const messages = document.getElementById("messages");
+<ul id="messages"></ul>
 
-        form.addEventListener("submit", function(e) {
-            e.preventDefault();
-            if (input.value) {
-                socket.emit("chat message", input.value);
-                input.value = "";
-            }
-        });
+<form id="form">
+    <input id="input" autocomplete="off" />
+    <button>Küldés</button>
+</form>
 
-        socket.on("chat message", function(msg) {
-            const item = document.createElement("li");
-            item.textContent = msg;
-            messages.appendChild(item);
-        });
-    </script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+
+const form = document.getElementById("form");
+const input = document.getElementById("input");
+const messages = document.getElementById("messages");
+
+// régi üzenetek
+socket.on("load messages", (msgs) => {
+    msgs.forEach(m => addMessage(m.text));
+});
+
+// küldés
+form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (input.value) {
+        socket.emit("chat message", input.value);
+        input.value = "";
+    }
+});
+
+// fogadás
+socket.on("chat message", (msg) => {
+    addMessage(msg.text);
+});
+
+function addMessage(text) {
+    const li = document.createElement("li");
+    li.textContent = text;
+    messages.appendChild(li);
+}
+</script>
+
 </body>
 </html>
